@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ilp-packet": "^2.1.2",
     "ilp-plugin-btp": "^1.1.5",
     "machinomy": "^1.5.0"
   }

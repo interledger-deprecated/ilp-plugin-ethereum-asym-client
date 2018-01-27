@@ -55,8 +55,16 @@ class Plugin extends PluginBtp {
       this._peerAccount,
       this._minimumChannelAmount)
 
-    console.log('created', result)
+    debug('got payment channel. channelId=' + result.channelId,
+      'value=' + result.value.toString(),
+      'spent=' + result.spent.toString(),
+      'receiver=' + result.receiver)
     this._channel = result.channelId
+
+    // TODO: should we store whether we've paid the upfront cost
+    if (!info.clientChannel) {
+      await this.sendMoney(info.minimumChannelAmount)
+    }
   }
 
   async _disconnect () {
@@ -74,12 +82,22 @@ class Plugin extends PluginBtp {
   }
 
   async sendMoney (amount) {
+    const channels = await this._machinomy.channels()
+    const currentChannel = channels
+      .filter(c => c.channelId === this._channel)[0]
+
+    if (currentChannel.spent.add(amount).gte(currentChannel.value)) {
+      // TODO: do this pre-emptively and asynchronously
+      debug('funding channel for', currentChannel.value.toString())
+      await this._machinomy.deposit(this._channel, currentChannel.value)
+    }
+
     const payment = await this._machinomy.nextPayment(
       this._channel,
       new BigNumber(amount),
       '')
 
-    console.log("PAYMENT", payment)
+    debug('sending payment.', payment)
     return this._call(null, {
       type: BtpPacket.TYPE_TRANSFER,
       requestId: await _requestId(),
@@ -99,8 +117,9 @@ class Plugin extends PluginBtp {
     if (primary.protocolName === 'machinomy') {
       const payment = new Payment(JSON.parse(primary.data.toString()))
       await this._machinomy.acceptPayment(payment)
-      if (payment.price > 0 && this._moneyHandler) {
-        await this._moneyHandler(payment.price)
+      debug('got payment. amount=' + payment.price.toString())
+      if (payment.price.gt(0) && this._moneyHandler) {
+        await this._moneyHandler(payment.price.toString())
       }
     }
   }
