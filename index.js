@@ -5,6 +5,7 @@ const BigNumber = require('bignumber.js')
 const Web3 = require('web3')
 const Machinomy = require('machinomy').default
 const Payment = require('machinomy/lib/payment').default
+const PluginBtp = require('ilp-plugin-btp')
 
 class Plugin extends BtpPlugin {
   constructor (opts) {
@@ -38,15 +39,11 @@ class Plugin extends BtpPlugin {
     const info = JSON.parse(infoResponse.protocolData[0].data.toString())
     debug('got info. info=', info)
 
-    this._peerAccount = info.peerAccount
-    this._channel = info.channel
-
-    if (!this._channel) {
-      // TODO: establish channel to peer
-      this._channel = /* TODO */
-    }
-
-    // TODO: request a counter-channel
+    this._peerAccount = info.ethereumAccount
+    this._channel = await this.machinomy.requireOpenChannel(
+      this._account,
+      this._peerAccount,
+      this._minimumChannelAmount)
   }
 
   async _disconnect () {
