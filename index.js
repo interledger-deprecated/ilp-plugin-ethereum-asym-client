@@ -1,4 +1,5 @@
 'use strict'
+const crypto = require('crypto')
 const debug = require('debug')('ilp-plugin-ethereum-asym-client')
 const BtpPacket = require('btp-packet')
 const BigNumber = require('bignumber.js')
@@ -7,7 +8,16 @@ const Machinomy = require('machinomy').default
 const Payment = require('machinomy/lib/payment').default
 const PluginBtp = require('ilp-plugin-btp')
 
-class Plugin extends BtpPlugin {
+async function _requestId () {
+  return new Promise((resolve, reject) => {
+    crypto.randomBytes(4, (err, buf) => {
+      if (err) reject(err)
+      resolve(buf.readUInt32BE(0))
+    })
+  })
+}
+
+class Plugin extends PluginBtp {
   constructor (opts) {
     super(opts)
     this._account = opts.account
@@ -20,19 +30,19 @@ class Plugin extends BtpPlugin {
   }
 
   async _connect () {
-    this.machinomy = new Machinomy(this.account, this.web3, {
+    this._machinomy = new Machinomy(this._account, this._web3, {
       engine: 'nedb',
-      databaseFile: this.db,
-      minimumChannelAmount: this.minimumChannelAmount
+      databaseFile: this._db,
+      minimumChannelAmount: this._minimumChannelAmount
     })
 
     const infoResponse = await this._call(null, {
       type: BtpPacket.TYPE_MESSAGE,
-      requestId: await util._requestId(),
+      requestId: await _requestId(),
       data: { protocolData: [{
         protocolName: 'info',
         contentType: BtpPacket.MIME_APPLICATION_OCTET_STREAM,
-        data: Buffer.from([ util.INFO_REQUEST_ALL ])
+        data: Buffer.from([ 2 ])
       }] }
     })
 
@@ -40,10 +50,13 @@ class Plugin extends BtpPlugin {
     debug('got info. info=', info)
 
     this._peerAccount = info.ethereumAccount
-    this._channel = await this.machinomy.requireOpenChannel(
+    const result = await this._machinomy.requireOpenChannel(
       this._account,
       this._peerAccount,
       this._minimumChannelAmount)
+
+    console.log('created', result)
+    this._channel = result.channelId
   }
 
   async _disconnect () {
@@ -61,14 +74,15 @@ class Plugin extends BtpPlugin {
   }
 
   async sendMoney (amount) {
-    const payment = await this.machinomy.nextPayment(
+    const payment = await this._machinomy.nextPayment(
       this._channel,
       new BigNumber(amount),
       '')
 
+    console.log("PAYMENT", payment)
     return this._call(null, {
       type: BtpPacket.TYPE_TRANSFER,
-      requestId: await util._requestId(),
+      requestId: await _requestId(),
       data: {
         amount,
         protocolData: [{
@@ -84,10 +98,12 @@ class Plugin extends BtpPlugin {
     const primary = data.protocolData[0]
     if (primary.protocolName === 'machinomy') {
       const payment = new Payment(JSON.parse(primary.data.toString()))
-      await this.machinomy.acceptPayment(payment)
+      await this._machinomy.acceptPayment(payment)
       if (payment.price > 0 && this._moneyHandler) {
         await this._moneyHandler(payment.price)
       }
     }
   }
 }
+
+module.exports = Plugin
