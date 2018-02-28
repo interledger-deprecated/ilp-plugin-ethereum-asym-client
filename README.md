@@ -43,3 +43,27 @@ new PluginEthereumAsymClient({
   minimumChannelAmount: '10000', // amount with which to fund the channel
 })
 ```
+
+## Connecting to the testnet (easy way)
+
+* Sign up on https://infura.io and get your RINKEBY_PROVIDER_URL from them
+* That service doesn't support private accounts, so for that, choose a SECRET
+* Using this RINKEBY_PROVIDER_URL and SECRET, run:
+```sh
+export RINKEBY_PROVIDER_URL=https://rinkeby.infura.io/QIQwjA7rQvIVca6Z4Tjl
+export SECRET=ietah3IeZ0Zun4Se2daf3ieVia8Xeengahx8quo0
+npm install
+DEBUG=* node scripts/test-infura.js
+```
+
+## Connecting to the testnet (hard way)
+
+* Follow the instructions from https://gist.github.com/cryptogoth/10a98e8078cfd69f7ca892ddbdcf26bc
+* Make sure to run `geth --rinkeby --rpc` instead of just `geth --rinkeby`
+* In another terminal window, run:
+```sh
+npm install
+DEBUG=* ADDRESS=0xb9458d0076cc76d4568ebaac482ace6f1b30becb node scripts/test-geth.js
+```
+
+You will run into https://github.com/sharafian/ilp-plugin-ethereum-asym-client/issues/4, which we're currently fixing!
