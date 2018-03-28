@@ -5,7 +5,7 @@ const BtpPacket = require('btp-packet')
 const BigNumber = require('bignumber.js')
 const Web3 = require('web3')
 const Machinomy = require('machinomy').default
-const Payment = require('machinomy/lib/payment').default
+const Payment = require('machinomy/dist/lib/Payment').default
 const PluginBtp = require('ilp-plugin-btp')
 
 async function _requestId () {
@@ -23,7 +23,7 @@ class Plugin extends PluginBtp {
     this._account = opts.account
     this._db = opts.db || 'machinomy_db'
     this._provider = opts.provider || 'http://localhost:8545'
-    this._minimumChannelAmount = opts.minimumChannelAmount || 100
+    this._minimumChannelAmount = new BigNumber(opts.minimumChannelAmount || 100)
     this._web3 = new Web3(typeof this._provider === 'string'
       ? new Web3.providers.HttpProvider(this._provider)
       : this._provider)
@@ -31,11 +31,9 @@ class Plugin extends PluginBtp {
 
   async _connect () {
     this._machinomy = new Machinomy(this._account, this._web3, {
-      engine: 'nedb',
-      databaseFile: this._db,
+      databaseUrl: 'nedb://' + this._db,
       minimumChannelAmount: this._minimumChannelAmount
     })
-
     const infoResponse = await this._call(null, {
       type: BtpPacket.TYPE_MESSAGE,
       requestId: await _requestId(),
@@ -49,8 +47,8 @@ class Plugin extends PluginBtp {
     const info = JSON.parse(infoResponse.protocolData[0].data.toString())
     debug('got info. info=', info)
 
-    this._peerAccount = info.ethereumAccount
-    const result = await this._machinomy.requireOpenChannel(
+    this._peerAccount = '0x' + info.ethereumAccount.substring(2).toUpperCase()
+    const result = await this._machinomy.channelManager.requireOpenChannel(
       this._account,
       this._peerAccount,
       this._minimumChannelAmount)
