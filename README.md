@@ -65,5 +65,3 @@ DEBUG=* node scripts/test-infura.js
 npm install
 DEBUG=* ADDRESS=0xb9458d0076cc76d4568ebaac482ace6f1b30becb node scripts/test-geth.js
 ```
-
-You will run into https://github.com/sharafian/ilp-plugin-ethereum-asym-client/issues/4, which we're currently fixing!
