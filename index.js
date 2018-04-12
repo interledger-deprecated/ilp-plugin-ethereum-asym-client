@@ -5,7 +5,7 @@ const BtpPacket = require('btp-packet')
 const BigNumber = require('bignumber.js')
 const Web3 = require('web3')
 const Machinomy = require('machinomy').default
-const Payment = require('machinomy/dist/lib/Payment').default
+const PaymentSerde = require('machinomy/dist/lib/payment').PaymentSerde.instance
 const PluginBtp = require('ilp-plugin-btp')
 
 async function _requestId () {
@@ -27,6 +27,7 @@ class Plugin extends PluginBtp {
     this._web3 = new Web3(typeof this._provider === 'string'
       ? new Web3.providers.HttpProvider(this._provider)
       : this._provider)
+    this._receiver = null
   }
 
   async _connect () {
@@ -58,6 +59,7 @@ class Plugin extends PluginBtp {
       'spent=' + result.spent.toString(),
       'receiver=' + result.receiver)
     this._channel = result.channelId
+    this._receiver = result.receiver
 
     // TODO: should we store whether we've paid the upfront cost
     if (!info.clientChannel) {
@@ -90,10 +92,10 @@ class Plugin extends PluginBtp {
       await this._machinomy.deposit(this._channel, currentChannel.value)
     }
 
-    const payment = await this._machinomy.nextPayment(
-      this._channel,
-      new BigNumber(amount),
-      '')
+    const payment = await this._machinomy.nextPayment({
+      receiver: this._receiver, // TODO _channel.receiver?
+      price: new BigNumber(amount)
+    })
 
     debug('sending payment.', payment)
     return this._call(null, {
@@ -104,7 +106,7 @@ class Plugin extends PluginBtp {
         protocolData: [{
           protocolName: 'machinomy',
           contentType: BtpPacket.MIME_APPLICATION_JSON,
-          data: Buffer.from(JSON.stringify(payment))
+          data: Buffer.from(JSON.stringify(PaymentSerde.serialize(payment)))
         }]
       }
     })
@@ -113,7 +115,7 @@ class Plugin extends PluginBtp {
   async _handleMoney (from, { requestId, data }) {
     const primary = data.protocolData[0]
     if (primary.protocolName === 'machinomy') {
-      const payment = new Payment(JSON.parse(primary.data.toString()))
+      const payment = JSON.parse(primary.data.toString())
       await this._machinomy.acceptPayment(payment)
       debug('got payment. amount=' + payment.price.toString())
       if (payment.price.gt(0) && this._moneyHandler) {
