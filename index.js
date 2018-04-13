@@ -90,12 +90,12 @@ class Plugin extends PluginBtp {
       await this._machinomy.deposit(this._channel, currentChannel.value)
     }
 
-    const payment = await this._machinomy.nextPayment(
-      this._channel,
-      new BigNumber(amount),
-      '')
+    const payment = await this._machinomy.nextPayment({
+      receiver: this._channel,
+      price: new BigNumber(amount),
+      meta: '' })
 
-    debug('sending payment.', payment)
+    debug('sending payment.', payment, JSON.stringify(payment))
     return this._call(null, {
       type: BtpPacket.TYPE_TRANSFER,
       requestId: await _requestId(),
@@ -114,7 +114,7 @@ class Plugin extends PluginBtp {
     const primary = data.protocolData[0]
     if (primary.protocolName === 'machinomy') {
       const payment = new Payment(JSON.parse(primary.data.toString()))
-      await this._machinomy.acceptPayment(payment)
+      await this._machinomy.acceptPayment({ payment })
       debug('got payment. amount=' + payment.price.toString())
       if (payment.price.gt(0) && this._moneyHandler) {
         await this._moneyHandler(payment.price.toString())

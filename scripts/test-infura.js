@@ -9,6 +9,7 @@ if (typeof process.env.RINKEBY_PROVIDER_URL == 'undefined' || typeof process.env
   process.exit(1)
 }
 
+console.log('creating provider')
 const provider = new HDWalletProvider(process.env.SECRET, process.env.RINKEBY_PROVIDER_URL)
 console.log(provider)
 // const account = '0x' + provider.address.substring(2).toUpperCase()
