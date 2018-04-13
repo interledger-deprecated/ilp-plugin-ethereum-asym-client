@@ -5,7 +5,6 @@ const BtpPacket = require('btp-packet')
 const BigNumber = require('bignumber.js')
 const Web3 = require('web3')
 const Machinomy = require('machinomy').default
-const PaymentSerde = require('machinomy/dist/lib/payment').PaymentSerde.instance
 const PluginBtp = require('ilp-plugin-btp')
 
 async function _requestId () {
@@ -92,8 +91,8 @@ class Plugin extends PluginBtp {
       await this._machinomy.deposit(this._channel, currentChannel.value)
     }
 
-    const payment = await this._machinomy.nextPayment({
-      receiver: this._receiver, // TODO _channel.receiver?
+    const {payment} = await this._machinomy.payment({
+      receiver: this._receiver,
       price: new BigNumber(amount)
     })
 
@@ -106,7 +105,7 @@ class Plugin extends PluginBtp {
         protocolData: [{
           protocolName: 'machinomy',
           contentType: BtpPacket.MIME_APPLICATION_JSON,
-          data: Buffer.from(JSON.stringify(PaymentSerde.serialize(payment)))
+          data: Buffer.from(JSON.stringify(payment))
         }]
       }
     })
