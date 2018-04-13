@@ -5,7 +5,6 @@ const BtpPacket = require('btp-packet')
 const BigNumber = require('bignumber.js')
 const Web3 = require('web3')
 const Machinomy = require('machinomy').default
-const Payment = require('machinomy/dist/lib/Payment').default
 const PluginBtp = require('ilp-plugin-btp')
 
 async function _requestId () {
@@ -27,6 +26,7 @@ class Plugin extends PluginBtp {
     this._web3 = new Web3(typeof this._provider === 'string'
       ? new Web3.providers.HttpProvider(this._provider)
       : this._provider)
+    this._receiver = null
   }
 
   async _connect () {
@@ -58,6 +58,7 @@ class Plugin extends PluginBtp {
       'spent=' + result.spent.toString(),
       'receiver=' + result.receiver)
     this._channel = result.channelId
+    this._receiver = result.receiver
 
     // TODO: should we store whether we've paid the upfront cost
     if (!info.clientChannel) {
@@ -90,10 +91,10 @@ class Plugin extends PluginBtp {
       await this._machinomy.deposit(this._channel, currentChannel.value)
     }
 
-    const payment = await this._machinomy.nextPayment({
-      receiver: this._channel,
-      price: new BigNumber(amount),
-      meta: '' })
+    const {payment} = await this._machinomy.payment({
+      receiver: this._receiver,
+      price: new BigNumber(amount)
+    })
 
     debug('sending payment.', payment, JSON.stringify(payment))
     return this._call(null, {
