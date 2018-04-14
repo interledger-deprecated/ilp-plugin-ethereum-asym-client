@@ -80,6 +80,7 @@ class Plugin extends PluginBtp {
   }
 
   async sendMoney (amount) {
+    console.log('sendMoney', amount)
     const channels = await this._machinomy.channels()
     const currentChannel = channels
       .filter(c => c.channelId === this._channel)[0]
@@ -89,11 +90,12 @@ class Plugin extends PluginBtp {
       debug('funding channel for', currentChannel.value.toString())
       await this._machinomy.deposit(this._channel, currentChannel.value)
     }
-
-    const payment = await this._machinomy.nextPayment(
-      this._channel,
-      new BigNumber(amount),
-      '')
+console.log('calling nextPayment!')
+    const payment = await this._machinomy.nextPayment({
+      channel: this._channel,
+      price: new BigNumber(amount),
+      meta: ''
+    })
 
     debug('sending payment.', payment)
     return this._call(null, {

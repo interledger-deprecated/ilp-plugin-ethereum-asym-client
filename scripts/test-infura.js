@@ -38,4 +38,6 @@ plugin.connect().then(async () => {
     console.log('got money!', packet)
     plugin.disconnect()
   })
+}, err => {
+  console.log('connect error!!', err)
 })
