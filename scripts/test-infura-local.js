@@ -45,4 +45,4 @@ plugin.connect().then(async () => {
   console.log('disconnecting')
   await plugin.disconnect()
   console.log('done')
-})
+}, err => console.error(err))
