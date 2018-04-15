@@ -44,6 +44,19 @@ new PluginEthereumAsymClient({
 })
 ```
 
+## Connecting to a local server
+
+* Follow the instructions from https://github.com/interledgerjs/ilp-plugin-ethereum-asym-server/blob/1db56bd25e20e1c93576da0bc499f7ab217101f8/README.md#usage
+* Sign up on https://infura.io and get your RINKEBY_PROVIDER_URL from them
+* That service doesn't support private accounts, so for that, choose a SECRET
+* Using this RINKEBY_PROVIDER_URL and SECRET, in a separate window from the one running the server, run the clients:
+```sh
+export RINKEBY_PROVIDER_URL=https://rinkeby.infura.io/QIQwjA7rQvIVca6Z4Tjl
+export SECRET=ietah3IeZ0Zun4Se2daf3ieVia8Xeengahx8quo0
+npm install
+DEBUG=* node scripts/test-infura-local.js
+```
+
 ## Connecting to the testnet (easy way)
 
 * Sign up on https://infura.io and get your RINKEBY_PROVIDER_URL from them
