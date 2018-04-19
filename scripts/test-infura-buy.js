@@ -49,6 +49,7 @@ var f = (function () { return __awaiter(_this, void 0, void 0, function () {
                 const HDWalletProvider = require('truffle-hdwallet-provider')
                 const provider = new HDWalletProvider(process.env.SECRET, process.env.PROVIDER_URL)
                 sender = '0x' + provider.address.substring(2).toLowerCase()
+                console.log(`Please make sure ${sender} on Ropsten has some Wei in it! http://faucet.ropsten.be:3001/`)
                 web3 = new Web3(provider);
                 machinomy = new index_1["default"](sender, web3, { databaseUrl: 'nedb://./machinomy_client' });
                 return [4 /*yield*/, fetch('http://localhost:3000/content')];
