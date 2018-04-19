@@ -45,11 +45,10 @@ var f = (function () { return __awaiter(_this, void 0, void 0, function () {
         switch (_a.label) {
             case 0:
                 fetch = require('whatwg-fetch').fetch;
-                sender = '0x3284166218919725e0d27da8dc54b9e8c2e3c31b';
- //               provider = new Web3.providers.HttpProvider('http://localhost:8545');
 
                 const HDWalletProvider = require('truffle-hdwallet-provider')
-                const provider = new HDWalletProvider(process.env.SECRET, process.env.RINKEBY_PROVIDER_URL)
+                const provider = new HDWalletProvider(process.env.SECRET, process.env.PROVIDER_URL)
+                sender = '0x' + provider.address.substring(2).toLowerCase()
                 web3 = new Web3(provider);
                 machinomy = new index_1["default"](sender, web3, { databaseUrl: 'nedb://./machinomy_client' });
                 return [4 /*yield*/, fetch('http://localhost:3000/content')];

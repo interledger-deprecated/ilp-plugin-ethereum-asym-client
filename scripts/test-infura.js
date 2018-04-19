@@ -4,17 +4,17 @@ const IlDcp = require('ilp-protocol-ildcp')
 const IlpPacket = require('ilp-packet')
 const HDWalletProvider = require('truffle-hdwallet-provider')
 function sha256(preimage) { return crypto.createHash('sha256').update(preimage).digest() }
-if (typeof process.env.RINKEBY_PROVIDER_URL == 'undefined' || typeof process.env.SECRET == 'undefined') {
-  console.error('Please set the RINKEBY_PROVIDER_URL and SECRET env vars!')
+if (typeof process.env.PROVIDER_URL == 'undefined' || typeof process.env.SECRET == 'undefined') {
+  console.error('Please set the PROVIDER_URL and SECRET env vars!')
   process.exit(1)
 }
 
 console.log('creating provider')
-const provider = new HDWalletProvider(process.env.SECRET, process.env.RINKEBY_PROVIDER_URL)
+const provider = new HDWalletProvider(process.env.SECRET, process.env.PROVIDER_URL)
 console.log(provider)
 // const account = '0x' + provider.address.substring(2).toUpperCase()
 const account = '0x' + provider.address.substring(2).toLowerCase()
-console.log('Connecting to Amundsen, settling over Machinomy Ethereum Rinkeby, account:', account)
+console.log('Connecting to Amundsen, settling over Machinomy Ethereum, account:', account)
 
 const plugin = new Plugin({
   account,
