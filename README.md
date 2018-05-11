@@ -78,3 +78,14 @@ DEBUG=* node scripts/test-infura.js
 npm install
 DEBUG=* ADDRESS=0xb9458d0076cc76d4568ebaac482ace6f1b30becb node scripts/test-geth.js
 ```
+
+## Local test
+
+Against ilp-plugin-ethereum-asym-server:
+
+```sh
+npm install
+export PROVIDER_URL=https://ropsten.infura.io/T1S8a0bkyrGD7jxJBgeH
+export SECRET="repair good hover betray buddy deal night wide mean round great tackle"
+DEBUG=* node scripts/test-infura-local.js
+```
