@@ -17,7 +17,12 @@ const plugin = new Plugin({
   account,
   provider,
   // server: 'btp+wss://:token@amundsen.ilpdemo.org:1813'
-  server: 'btp+ws://:token@localhost:6666'
+  server: 'btp+ws://:token@localhost:6666',
+  debugHostIldcpInfo: {
+      clientAddress: 'test.example',
+      assetCode: 'ETH',
+      assetScale: 6
+  }
 })
 console.log('connecting')
 plugin.connect().then(async () => {
