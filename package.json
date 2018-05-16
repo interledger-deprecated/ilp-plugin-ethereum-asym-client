@@ -11,10 +11,10 @@
   "dependencies": {
     "ilp-packet": "^2.1.2",
     "ilp-plugin-btp": "^1.1.5",
-    "machinomy": "^1.6.1"
+    "machinomy": "1.8.1"
   },
   "devDependencies": {
     "ilp-protocol-ildcp": "^1.0.0",
-    "truffle-hdwallet-provider": "0.0.3"
+    "truffle-hdwallet-provider": "https://github.com/machinomy/truffle-hdwallet-provider#8fe3dc5640cda0aedd6e58d62da9adc38d359a8a"
   }
 }
