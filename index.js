@@ -91,9 +91,16 @@ class Plugin extends PluginBtp {
       await this._machinomy.deposit(this._channel, currentChannel.value)
     }
 
+    const price = new BigNumber(amount)
+    
+    // Don't bother sending channel updates for 0 amounts
+    if (price.eq(0)) {
+      return
+    }
+
     const {payment} = await this._machinomy.payment({
       receiver: this._receiver,
-      price: new BigNumber(amount)
+      price
     })
 
     debug('sending payment.', payment, JSON.stringify(payment))
