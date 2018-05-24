@@ -121,10 +121,10 @@ class Plugin extends PluginBtp {
   async _handleMoney (from, { requestId, data }) {
     const primary = data.protocolData[0]
     if (primary.protocolName === 'machinomy') {
-      const payment = new Payment(JSON.parse(primary.data.toString()))
+      const payment = JSON.parse(primary.data.toString())
       await this._machinomy.acceptPayment({ payment })
-      debug('got payment. amount=' + payment.price.toString())
-      if (payment.price.gt(0) && this._moneyHandler) {
+      debug('got payment. amount=' + payment.price)
+      if (new BigNumber(payment.price).gt(0) && this._moneyHandler) {
         await this._moneyHandler(payment.price.toString())
       }
     }
