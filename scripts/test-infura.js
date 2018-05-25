@@ -3,8 +3,8 @@ const crypto = require('crypto')
 const IlDcp = require('ilp-protocol-ildcp')
 const IlpPacket = require('ilp-packet')
 const HDWalletProvider = require('truffle-hdwallet-provider')
-function sha256(preimage) { return crypto.createHash('sha256').update(preimage).digest() }
-if (typeof process.env.PROVIDER_URL == 'undefined' || typeof process.env.SECRET == 'undefined') {
+function sha256 (preimage) { return crypto.createHash('sha256').update(preimage).digest() }
+if (typeof process.env.PROVIDER_URL === 'undefined' || typeof process.env.SECRET === 'undefined') {
   console.error('Please set the PROVIDER_URL and SECRET env vars!')
   process.exit(1)
 }

@@ -2,8 +2,8 @@ const Plugin = require('..')
 const crypto = require('crypto')
 const IlDcp = require('ilp-protocol-ildcp')
 const IlpPacket = require('ilp-packet')
-function sha256(preimage) { return crypto.createHash('sha256').update(preimage).digest() }
-if (typeof process.env.ADDRESS == 'undefined') {
+function sha256 (preimage) { return crypto.createHash('sha256').update(preimage).digest() }
+if (typeof process.env.ADDRESS === 'undefined') {
   console.error('Please set the ADDRESS env var to your Ethereum address!')
   process.exit(1)
 }
