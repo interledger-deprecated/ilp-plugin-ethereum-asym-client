@@ -4,7 +4,8 @@ const debug = require('debug')('ilp-plugin-ethereum-asym-client')
 const BtpPacket = require('btp-packet')
 const BigNumber = require('bignumber.js')
 const Web3 = require('web3')
-const { Machinomy, Payment } = require('machinomy')
+const Machinomy = require('machinomy').default
+const Payment = require('machinomy/dist/lib/payment').default
 const PluginBtp = require('ilp-plugin-btp')
 
 async function _requestId () {
@@ -92,7 +93,7 @@ class Plugin extends PluginBtp {
     }
 
     const price = new BigNumber(amount)
-    
+
     // Don't bother sending channel updates for 0 amounts
     if (price.eq(0)) {
       return
