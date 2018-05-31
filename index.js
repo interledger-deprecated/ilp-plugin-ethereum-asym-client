@@ -5,7 +5,6 @@ const BtpPacket = require('btp-packet')
 const BigNumber = require('bignumber.js')
 const Web3 = require('web3')
 const Machinomy = require('machinomy').default
-const Payment = require('machinomy/dist/lib/payment').default
 const PluginBtp = require('ilp-plugin-btp')
 
 async function _requestId () {
