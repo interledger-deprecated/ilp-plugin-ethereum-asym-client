@@ -70,7 +70,7 @@ class Plugin extends PluginBtp {
     await this._settle()
     await this._machinomy.shutdown()
   }
-  
+
   async _settle () {
     // Settle channels for which this client is a receiver and are ready to be settled
     const channels = (await this._machinomy.channels()).filter(
@@ -94,16 +94,16 @@ class Plugin extends PluginBtp {
 
   async sendMoney (amount) {
     const price = new BigNumber(amount)
-    
+
     // Don't bother sending channel updates for 0 amounts
     if (price.eq(0)) {
       return
     }
-    
+
     const channels = await this._machinomy.channels()
     const currentChannel = channels
       .filter(c => c.channelId === this._channel)[0]
-    
+
     // Deposit enough to the existing channel to cover the payment instead of opening a new one
     const depositAmount = price.plus(currentChannel.spent).minus(currentChannel.value)
     if (depositAmount.gt(0)) {
@@ -134,13 +134,13 @@ class Plugin extends PluginBtp {
 
   async _handleMoney (from, { requestId, data }) {
     const primary = data.protocolData[0]
-    
+
     if (primary.protocolName === 'machinomy') {
       const payment = JSON.parse(primary.data.toString())
       await this._machinomy.acceptPayment({ payment })
-      
+
       debug('got payment. amount=' + payment.price)
-      
+
       if (new BigNumber(payment.price).gt(0) && this._moneyHandler) {
         await this._moneyHandler(payment.price.toString())
       }
