@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bignumber.js": "^4.1.0",
     "ilp-packet": "^2.1.2",
     "ilp-plugin-btp": "^1.1.5",
     "machinomy": "1.8.1"
