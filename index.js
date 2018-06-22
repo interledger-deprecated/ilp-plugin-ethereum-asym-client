@@ -67,7 +67,19 @@ class Plugin extends PluginBtp {
   }
 
   async _disconnect () {
-    // closes the machinomy channel at a different date
+    await this._settle()
+    await this._machinomy.shutdown()
+  }
+
+  async _settle () {
+    // Settle channels for which this client is a receiver and are ready to be settled
+    const channels = (await this._machinomy.channels()).filter(
+      c => c.receiver === this._account && c.state === 0
+    )
+    debug('settling payment channels for amounts', channels.map(c => c.spent.toString()))
+    return Promise.all(
+      channels.map(c => this._machinomy.close(c.channelId))
+    )
   }
 
   async _handleData (from, { requestId, data }) {
@@ -81,16 +93,6 @@ class Plugin extends PluginBtp {
   }
 
   async sendMoney (amount) {
-    const channels = await this._machinomy.channels()
-    const currentChannel = channels
-      .filter(c => c.channelId === this._channel)[0]
-
-    if (currentChannel.spent.add(amount).gte(currentChannel.value)) {
-      // TODO: do this pre-emptively and asynchronously
-      debug('funding channel for', currentChannel.value.toString())
-      await this._machinomy.deposit(this._channel, currentChannel.value)
-    }
-
     const price = new BigNumber(amount)
 
     // Don't bother sending channel updates for 0 amounts
@@ -98,6 +100,18 @@ class Plugin extends PluginBtp {
       return
     }
 
+    const channels = await this._machinomy.channels()
+    const currentChannel = channels
+      .filter(c => c.channelId === this._channel)[0]
+
+    // Deposit enough to the existing channel to cover the payment instead of opening a new one
+    const depositAmount = price.plus(currentChannel.spent).minus(currentChannel.value)
+    if (depositAmount.gt(0)) {
+      debug('funding channel for', depositAmount.toString())
+      await this._machinomy.deposit(this._channel, depositAmount)
+    }
+
+    // If a channel is sufficiently funded, Machinomy uses that; if not, it opens a new one
     const {payment} = await this._machinomy.payment({
       receiver: this._receiver,
       price
@@ -120,10 +134,13 @@ class Plugin extends PluginBtp {
 
   async _handleMoney (from, { requestId, data }) {
     const primary = data.protocolData[0]
+
     if (primary.protocolName === 'machinomy') {
       const payment = JSON.parse(primary.data.toString())
       await this._machinomy.acceptPayment({ payment })
+
       debug('got payment. amount=' + payment.price)
+
       if (new BigNumber(payment.price).gt(0) && this._moneyHandler) {
         await this._moneyHandler(payment.price.toString())
       }
