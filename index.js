@@ -187,11 +187,11 @@ class Plugin extends PluginBtp {
 
       const amount = new EthUnit(payment.price, 'wei').gwei()
       debug('got payment for', amount.ethStr())
-      
+
       if (!this._moneyHandler) {
         throw new Error('no money handler registered')
       }
-      
+
       if (amount.gt(0)) {
         await this._moneyHandler(amount.toString())
       }
