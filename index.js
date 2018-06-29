@@ -162,7 +162,6 @@ class Plugin extends PluginBtp {
       price
     })
 
-    // TODO: how should I debug this?
     debug('sending payment.', payment)
     return this._call(null, {
       type: BtpPacket.TYPE_TRANSFER,
